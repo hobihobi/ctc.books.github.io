@@ -1,11 +1,12 @@
 * {
   box-sizing: border-box;
 }
--
+
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: 'Noto Sans KR', sans-serif; /* 한국어 폰트 적용 */
   margin: 0;
-  background-color: #f9f9f9;
+  background-color: #f9f9f9; /* 배경 색상 유지 */
+  color: #333; /* 기본 텍스트 색상 추가 */
 }
 
 header {
@@ -13,6 +14,7 @@ header {
   color: white;
   padding: 1rem;
   text-align: center;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 헤더에 그림자 추가 */
 }
 
 nav ul {
@@ -24,11 +26,20 @@ nav ul {
   list-style: none;
 }
 
+nav li {
+  margin: 0;
+}
+
 nav li a {
   color: white;
   padding: 0.8rem 1.5rem;
   display: block;
   text-decoration: none;
+  transition: background-color 0.2s ease; /* 호버 효과를 부드럽게 */
+}
+
+nav li a:hover {
+  background-color: #0d1b5e; /* 호버 시 배경 색 변경 */
 }
 
 .container {
@@ -46,12 +57,14 @@ nav li a {
 }
 
 button {
-  padding: 10px 20px;
+  padding: 12px 24px; /* 버튼 크기 조정 */
   background-color: #2196f3;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 16px; /* 버튼 텍스트 크기 확대 */
+  transition: background-color 0.2s ease; /* 호버 효과 부드럽게 */
 }
 
 button:hover {
@@ -67,6 +80,10 @@ button:hover {
   width: 150px;
   margin: 10px;
   text-align: center;
+  background-color: #fff; /* 카드 배경 색 추가 */
+  border-radius: 10px; /* 카드 둥근 모서리 */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 카드 그림자 추가 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* 호버 효과 부드럽게 */
 }
 
 .book-card img {
@@ -74,11 +91,18 @@ button:hover {
   height: 200px;
   object-fit: cover;
   border-radius: 6px;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .book-card img:hover {
   transform: scale(1.05);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* 이미지 호버 시 그림자 추가 */
+}
+
+.book-card p {
+  margin: 10px 0;
+  font-size: 14px; /* 텍스트 크기 조정 */
+  color: #444; /* 텍스트 색상 변경 */
 }
 
 input, select, textarea {
@@ -87,16 +111,27 @@ input, select, textarea {
   margin: 8px 0;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 14px; /* 폰트 크기 조정 */
+}
+
+textarea {
+  resize: vertical; /* 텍스트 에리어 크기 조정 가능 */
 }
 
 #reviewForm {
   background-color: #fffde7;
   padding: 20px;
   border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* 폼에 그림자 추가 */
 }
 
 @media (max-width: 600px) {
   .book-card {
-    width: 100%;
+    width: 100%; /* 작은 화면에서 카드 너비를 창 너비로 */
+  }
+
+  button {
+    font-size: 14px; /* 작은 화면에서 버튼 텍스트 크기 조정 */
+    padding: 10px 16px; /* 버튼 크기 축소 */
   }
 }
