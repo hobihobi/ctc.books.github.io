@@ -2,11 +2,11 @@ const bookData = {
   1: {
     "국어": [
       { title: "고전읽기의 즐거움", image: "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788981332624.jpg/120x180", link: "#" },
-      { title: "문학과 사회", image: "https://via.placeholder.com/120x180", link: "#" }
+      { title: "문학과 사회", image: "https://moonj1.com/wp-content/uploads/bookcover/5706-JP8m/120x180", link: "#" }
     ],
     "수학": [
-      { title: "수학이 필요한 순간", image: "https://via.placeholder.com/120x180", link: "#" },
-      { title: "수학의 정석 (기초편)", image: "https://via.placeholder.com/120x180", link: "#" }
+      { title: "수학이 필요한 순간", image: "https://contents.kyobobook.co.kr/sih/fft-1n/458x%C2%AE/pdt/9791189995997.Jp8/120x180", link: "#" },
+      { title: "수학의 정석 (기초편)", image: "https://1mage.yes24.com/momo/Topcate73/Midcatees/7248015.1pE/120x188", link: "#" }
     ]
   },
   2: {
