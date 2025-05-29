@@ -2,103 +2,11 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>책 추천 웹사이트</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-    }
-    header {
-      background-color: #3f51b5;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    nav ul {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      background-color: #1a237e;
-    }
-    nav li a {
-      color: white;
-      padding: 0.8rem 1.5rem;
-      text-decoration: none;
-      display: block;
-    }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 20px;
-    }
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 20px 0;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #2196f3;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #1976d2;
-    }
-    .hidden {
-      display: none;
-    }
-    .book-card {
-      display: inline-block;
-      width: 150px;
-      text-align: center;
-      margin: 10px;
-    }
-    .book-card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 6px;
-      transition: transform 0.2s;
-    }
-    .book-card img:hover {
-      transform: scale(1.05);
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #reviewForm {
-      background-color: #fffde7;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    @media (max-width: 600px) {
-      .book-card {
-        width: 100%;
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>고등학생 책 추천 웹사이트</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
   <header>
     <h1>📚 고등학생 책 추천 웹사이트</h1>
     <nav>
@@ -109,26 +17,23 @@
     </nav>
   </header>
 
-  <!-- [3] 메인 페이지: 학년 선택 -->
-  <div class="container" id="mainPage">
+  <main class="container" id="mainPage">
     <h2>학년 선택</h2>
     <div class="button-group">
       <button onclick="selectGrade(1)">1학년</button>
       <button onclick="selectGrade(2)">2학년</button>
       <button onclick="selectGrade(3)">3학년</button>
     </div>
-  </div>
+  </main>
 
-  <!-- [4] 과목 선택 및 도서 목록 -->
-  <div class="container hidden" id="subjectPage">
+  <section class="container hidden" id="subjectPage">
     <h2 id="subjectTitle"></h2>
     <div class="button-group" id="subjectButtons"></div>
     <div id="bookList"></div>
     <button onclick="showMain()">← 메인으로</button>
-  </div>
+  </section>
 
-  <!-- [5] 랭킹과 후기 섹션 -->
-  <div class="container hidden" id="rankPage">
+  <section class="container hidden" id="rankPage">
     <h2>⭐ 인기 도서 랭킹</h2>
     <div id="rankingTop"></div>
     <button onclick="toggleMoreRanks()">더 보기</button>
@@ -137,165 +42,24 @@
     <h2>✍️ 사용자 후기</h2>
     <div id="reviewDisplay"></div>
     <button onclick="toggleReviewForm()">후기 작성하기</button>
-    <div id="reviewForm" class="hidden">
+
+    <form id="reviewForm" class="hidden">
       <label>책 선택:
         <select id="reviewSelect">
           <option value="">직접 입력</option>
         </select>
       </label>
-      <input type="text" id="reviewTitle" placeholder="책 제목 (자유 입력)">
+      <input type="text" id="reviewTitle" placeholder="책 제목 (자유 입력)" />
       <textarea id="reviewText" placeholder="후기 작성"></textarea>
       <label>별점:
         <select id="reviewRating">
           <option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option>
         </select>
       </label>
-      <button onclick="submitReview()">저장</button>
-    </div>
-  </div>
+      <button type="button" onclick="submitReview()">저장</button>
+    </form>
+  </section>
 
-  <!-- [6] JavaScript (DOMContentLoaded로 감싸기) -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const data = {
-        1: {
-          "국어": [
-            { title: "고전읽기의 즐거움", image: "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788981332624.jpg/120x180", link: "#" },
-            { title: "문학과 사회", image: "https://moonji.com/wp-content/uploads/bookcover/5706.jpg/120x180", link: "#" }
-          ],
-          "수학": [
-            { title: "수학이 필요한 순간", image: "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791189995997.jpg/120x180", link: "#" },
-            { title: "수학의 정석 (기초편)", image: "https://image.yes24.com/momo/TopCate73/MidCate05/7240015.jpg/120x180", link: "#" }
-          ]
-        },
-        2: {
-          "독서": [
-            { title: "독서의 기술", image: "https://img.ridicdn.net/cover/805027223/xxlarge#1/120x180", link: "#" }
-          ]
-        },
-        3: {
-          "언어와 매체": [
-            { title: "국어의 기술", image: "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791198654601.jpg", link: "#" }
-          ]
-        }
-      };
-
-      let selectedGrade = null;
-      let reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-
-      window.selectGrade = function (grade) {
-        selectedGrade = grade;
-        document.getElementById("mainPage").classList.add("hidden");
-        document.getElementById("subjectPage").classList.remove("hidden");
-        document.getElementById("rankPage").classList.add("hidden");
-        document.getElementById("subjectTitle").textContent = `${grade}학년 과목 선택`;
-
-        const btnGroup = document.getElementById("subjectButtons");
-        btnGroup.innerHTML = "";
-        for (let subject in data[grade]) {
-          const btn = document.createElement("button");
-          btn.textContent = subject;
-          btn.onclick = () => showBooks(grade, subject);
-          btnGroup.appendChild(btn);
-        }
-      };
-
-      window.showBooks = function (grade, subject) {
-        const bookList = document.getElementById("bookList");
-        const books = data[grade][subject];
-        bookList.innerHTML = `<h3>${subject} 추천 도서</h3>`;
-        books.forEach(book => {
-          bookList.innerHTML += `
-            <div class="book-card">
-              <a href="${book.link}" target="_blank">
-                <img src="${book.image}" alt="${book.title}">
-              </a>
-              <p>${book.title}</p>
-            </div>
-          `;
-        });
-      };
-
-      window.showMain = function () {
-        document.getElementById("mainPage").classList.remove("hidden");
-        document.getElementById("subjectPage").classList.add("hidden");
-        document.getElementById("rankPage").classList.add("hidden");
-      };
-
-      window.showRank = function () {
-        document.getElementById("mainPage").classList.add("hidden");
-        document.getElementById("subjectPage").classList.add("hidden");
-        document.getElementById("rankPage").classList.remove("hidden");
-      };
-
-      window.toggleReviewForm = function () {
-        document.getElementById("reviewForm").classList.toggle("hidden");
-      };
-
-      window.submitReview = function () {
-        const title = document.getElementById("reviewSelect").value || document.getElementById("reviewTitle").value.trim();
-        const text = document.getElementById("reviewText").value.trim();
-        const rating = parseInt(document.getElementById("reviewRating").value);
-        if (!title || !text) return alert("책 제목과 후기를 입력하세요.");
-
-        reviews.push({ title, text, rating });
-        localStorage.setItem("reviews", JSON.stringify(reviews));
-        displayReviews();
-        displayRanking();
-
-        // 초기화
-        document.getElementById("reviewTitle").value = "";
-        document.getElementById("reviewText").value = "";
-        document.getElementById("reviewRating").value = "5";
-        document.getElementById("reviewSelect").value = "";
-        document.getElementById("reviewForm").classList.add("hidden");
-      };
-
-      function displayReviews() {
-        const out = reviews.map(r => `<div class='review-item'><strong>${r.title}</strong> (${r.rating}점)<br>${r.text}</div>`).join("");
-        document.getElementById("reviewDisplay").innerHTML = out;
-      }
-
-      function displayRanking() {
-        const rankMap = {};
-        reviews.forEach(r => {
-          if (!rankMap[r.title]) rankMap[r.title] = { count: 0, total: 0 };
-          rankMap[r.title].count++;
-          rankMap[r.title].total += r.rating;
-        });
-        const ranked = Object.entries(rankMap).map(([title, d]) => ({
-          title,
-          avg: (d.total / d.count).toFixed(2),
-          count: d.count
-        })).sort((a, b) => b.avg - a.avg || b.count - a.count);
-        const top5 = ranked.slice(0, 5).map((b, i) => `<div class='rank-card'><strong>${i + 1}위: ${b.title}</strong><br>평균 ${b.avg}점 (${b.count}명)</div>`).join("");
-        document.getElementById("rankingTop").innerHTML = top5;
-        const more = ranked.slice(5).map((b, i) => `<div class='rank-card'><strong>${i + 6}위: ${b.title}</strong><br>평균 ${b.avg}점 (${b.count}명)</div>`).join("");
-        document.getElementById("rankingMore").innerHTML = more;
-      }
-
-      window.toggleMoreRanks = function () {
-        document.getElementById("rankingMore").classList.toggle("hidden");
-      };
-
-      function populateBookOptions() {
-        const select = document.getElementById("reviewSelect");
-        select.innerHTML = '<option value="">직접 입력</option>';
-        Object.values(data).forEach(subjects => {
-          Object.values(subjects).flat().forEach(book => {
-            const opt = document.createElement("option");
-            opt.value = book.title;
-            opt.textContent = book.title;
-            select.appendChild(opt);
-          });
-        });
-      }
-
-      // 초기 실행
-      populateBookOptions();
-      displayReviews();
-      displayRanking();
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
