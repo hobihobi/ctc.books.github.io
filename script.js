@@ -1,12 +1,12 @@
-const bookData = {
+const data = {
   1: {
     "국어": [
-      { title: "고전읽기의 즐거움", image: "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788981332624.jpg/120x180", link: "#" },
-      { title: "문학과 사회", image: "https://moonj1.com/wp-content/uploads/bookcover/5706-JP8m/120x180", link: "#" }
+      { title: "고전읽기의 즐거움", image: "https://via.placeholder.com/120x180", link: "#" },
+      { title: "문학과 사회", image: "https://via.placeholder.com/120x180", link: "#" }
     ],
     "수학": [
-      { title: "수학이 필요한 순간", image: "https://contents.kyobobook.co.kr/sih/fft-1n/458x%C2%AE/pdt/9791189995997.Jp8/120x180", link: "#" },
-      { title: "수학의 정석 (기초편)", image: "https://1mage.yes24.com/momo/Topcate73/Midcatees/7248015.1pE/120x188", link: "#" }
+      { title: "수학이 필요한 순간", image: "https://via.placeholder.com/120x180", link: "#" },
+      { title: "수학의 정석 (기초편)", image: "https://via.placeholder.com/120x180", link: "#" }
     ]
   },
   2: {
@@ -21,27 +21,41 @@ const bookData = {
   }
 };
 
-let currentGrade = null;
-let reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
+let selectedGrade = null;
+let reviews = [];
+
+function loadReviews() {
+  fetch('https://your-firebase-app.firebaseio.com/reviews.json')
+    .then(res => res.json())
+    .then(data => {
+      reviews = Object.values(data || {});
+      displayReviews();
+      displayRanking();
+    });
+}
 
 function selectGrade(grade) {
-  currentGrade = grade;
-  togglePage("subjectPage");
+  selectedGrade = grade;
+  document.getElementById("mainPage").classList.add("hidden");
+  document.getElementById("subjectPage").classList.remove("hidden");
+  document.getElementById("rankPage").classList.add("hidden");
+
   document.getElementById("subjectTitle").textContent = `${grade}학년 과목 선택`;
-  const subjectButtons = document.getElementById("subjectButtons");
-  subjectButtons.innerHTML = "";
-  for (let subject in bookData[grade]) {
-    const button = document.createElement("button");
-    button.textContent = subject;
-    button.onclick = () => showBooks(grade, subject);
-    subjectButtons.appendChild(button);
+  const btnGroup = document.getElementById("subjectButtons");
+  btnGroup.innerHTML = "";
+  for (let subject in data[grade]) {
+    const btn = document.createElement("button");
+    btn.textContent = subject;
+    btn.onclick = () => showBooks(grade, subject);
+    btnGroup.appendChild(btn);
   }
 }
 
 function showBooks(grade, subject) {
+  const books = data[grade][subject];
   const bookList = document.getElementById("bookList");
   bookList.innerHTML = `<h3>${subject} 추천 도서</h3>`;
-  bookData[grade][subject].forEach(book => {
+  books.forEach(book => {
     bookList.innerHTML += `
       <div class="book-card">
         <a href="${book.link}" target="_blank">
@@ -53,18 +67,16 @@ function showBooks(grade, subject) {
   });
 }
 
-function showMainPage() {
-  togglePage("mainPage");
+function showMain() {
+  document.getElementById("mainPage").classList.remove("hidden");
+  document.getElementById("subjectPage").classList.add("hidden");
+  document.getElementById("rankPage").classList.add("hidden");
 }
 
-function showRankingPage() {
-  togglePage("rankingPage");
-}
-
-function togglePage(visibleId) {
-  ["mainPage", "subjectPage", "rankingPage"].forEach(id => {
-    document.getElementById(id).classList.toggle("hidden", id !== visibleId);
-  });
+function showRank() {
+  document.getElementById("mainPage").classList.add("hidden");
+  document.getElementById("subjectPage").classList.add("hidden");
+  document.getElementById("rankPage").classList.remove("hidden");
 }
 
 function toggleReviewForm() {
@@ -72,73 +84,76 @@ function toggleReviewForm() {
 }
 
 function submitReview() {
-  const selectedTitle = document.getElementById("reviewSelect").value;
-  const customTitle = document.getElementById("reviewTitle").value.trim();
-  const reviewText = document.getElementById("reviewText").value.trim();
+  const title = document.getElementById("reviewSelect").value || document.getElementById("reviewTitle").value.trim();
+  const text = document.getElementById("reviewText").value.trim();
   const rating = parseInt(document.getElementById("reviewRating").value);
 
-  const title = selectedTitle || customTitle;
-  if (!title || !reviewText) {
-    alert("책 제목과 후기를 입력하세요.");
-    return;
-  }
+  if (!title || !text) return alert("책 제목과 후기를 입력하세요.");
 
-  reviews.push({ title, text: reviewText, rating });
-  localStorage.setItem("reviews", JSON.stringify(reviews));
-  document.getElementById("reviewForm").classList.add("hidden");
-  displayReviews();
-  displayRanking();
-  document.getElementById("reviewTitle").value = "";
-  document.getElementById("reviewText").value = "";
-  document.getElementById("reviewRating").value = "5";
-  document.getElementById("reviewSelect").value = "";
+  const newReview = { title, text, rating };
+
+  fetch('https://your-firebase-app.firebaseio.com/reviews.json', {
+    method: "POST",
+    body: JSON.stringify(newReview)
+  }).then(() => {
+    loadReviews();
+    document.getElementById("reviewForm").classList.add("hidden");
+    document.getElementById("reviewTitle").value = "";
+    document.getElementById("reviewText").value = "";
+    document.getElementById("reviewRating").value = "5";
+    document.getElementById("reviewSelect").value = "";
+  });
 }
 
 function displayReviews() {
-  const reviewHTML = reviews.map(r => `<div class="review-item"><strong>${r.title}</strong> (${r.rating}점)<br>${r.text}</div>`).join("");
-  document.getElementById("reviewDisplay").innerHTML = reviewHTML;
+  const out = reviews.map(r => `
+    <div class='review-item'>
+      <strong>${r.title}</strong> (${r.rating}점)<br>${r.text}
+    </div>`).join("");
+  document.getElementById("reviewDisplay").innerHTML = out;
 }
 
 function displayRanking() {
   const rankMap = {};
-  reviews.forEach(({ title, rating }) => {
-    if (!rankMap[title]) rankMap[title] = { total: 0, count: 0 };
-    rankMap[title].total += rating;
-    rankMap[title].count++;
+  reviews.forEach(r => {
+    if (!rankMap[r.title]) rankMap[r.title] = { count: 0, total: 0 };
+    rankMap[r.title].count++;
+    rankMap[r.title].total += r.rating;
   });
 
-  const ranked = Object.entries(rankMap).map(([title, stats]) => ({
+  const ranked = Object.entries(rankMap).map(([title, d]) => ({
     title,
-    avg: (stats.total / stats.count).toFixed(2),
-    count: stats.count
+    avg: (d.total / d.count).toFixed(2),
+    count: d.count
   })).sort((a, b) => b.avg - a.avg || b.count - a.count);
 
-  document.getElementById("rankingTop").innerHTML = ranked.slice(0, 5).map((book, idx) =>
-    `<div class="rank-card"><strong>${idx + 1}위: ${book.title}</strong><br>평균 ${book.avg}점 (${book.count}명)</div>`
-  ).join("");
+  const top5 = ranked.slice(0, 5).map((b, i) => `
+    <div class='rank-card'><strong>${i + 1}위: ${b.title}</strong><br>평균 ${b.avg}점 (${b.count}명)</div>
+  `).join("");
+  document.getElementById("rankingTop").innerHTML = top5;
 
-  document.getElementById("rankingMore").innerHTML = ranked.slice(5).map((book, idx) =>
-    `<div class="rank-card"><strong>${idx + 6}위: ${book.title}</strong><br>평균 ${book.avg}점 (${book.count}명)</div>`
-  ).join("");
+  const more = ranked.slice(5).map((b, i) => `
+    <div class='rank-card'><strong>${i + 6}위: ${b.title}</strong><br>평균 ${b.avg}점 (${b.count}명)</div>
+  `).join("");
+  document.getElementById("rankingMore").innerHTML = more;
 }
 
 function toggleMoreRanks() {
   document.getElementById("rankingMore").classList.toggle("hidden");
 }
 
-function populateReviewSelect() {
+function populateBookOptions() {
   const select = document.getElementById("reviewSelect");
   select.innerHTML = '<option value="">직접 입력</option>';
-  Object.values(bookData).forEach(subjects =>
+  Object.values(data).forEach(subjects => {
     Object.values(subjects).flat().forEach(book => {
-      const option = document.createElement("option");
-      option.value = book.title;
-      option.textContent = book.title;
-      select.appendChild(option);
-    })
-  );
+      const opt = document.createElement("option");
+      opt.value = book.title;
+      opt.textContent = book.title;
+      select.appendChild(opt);
+    });
+  });
 }
 
-populateReviewSelect();
-displayReviews();
-displayRanking();
+populateBookOptions();
+loadReviews();
