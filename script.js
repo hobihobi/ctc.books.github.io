@@ -25,12 +25,19 @@ let selectedGrade = null;
 let reviews = [];
 
 function loadReviews() {
-  fetch('https://your-firebase-app.firebaseio.com/reviews.json')
+  fetch('https://your-real-firebase-url.firebaseio.com/reviews.json') // Firebase URL 수정
     .then(res => res.json())
     .then(data => {
+      console.log("Fetched Reviews:", data); // 디버깅용 로그
       reviews = Object.values(data || {});
+      console.log("Processed Reviews:", reviews); // 디버깅용 로그
       displayReviews();
       displayRanking();
+    })
+    .catch(error => {
+      console.error("Error loading reviews:", error); // 에러 처리
+      document.getElementById("reviewDisplay").innerHTML = "<p>리뷰 데이터를 불러오는 중 오류가 발생했습니다.</p>";
+      document.getElementById("rankingTop").innerHTML = "<p>랭킹 데이터를 불러오는 중 오류가 발생했습니다.</p>";
     });
 }
 
@@ -92,8 +99,11 @@ function submitReview() {
 
   const newReview = { title, text, rating };
 
-  fetch('https://your-firebase-app.firebaseio.com/reviews.json', {
+  fetch('https://your-real-firebase-url.firebaseio.com/reviews.json', { // Firebase URL 수정
     method: "POST",
+    headers: {
+      "Content-Type": "application/json" // 헤더 추가
+    },
     body: JSON.stringify(newReview)
   }).then(() => {
     loadReviews();
@@ -102,10 +112,17 @@ function submitReview() {
     document.getElementById("reviewText").value = "";
     document.getElementById("reviewRating").value = "5";
     document.getElementById("reviewSelect").value = "";
+  }).catch(error => {
+    console.error("Error submitting review:", error); // 에러 처리
+    alert("리뷰를 저장하는 중 오류가 발생했습니다.");
   });
 }
 
 function displayReviews() {
+  if (reviews.length === 0) { // 빈 데이터 처리
+    document.getElementById("reviewDisplay").innerHTML = "<p>아직 후기가 없습니다.</p>";
+    return;
+  }
   const out = reviews.map(r => `
     <div class='review-item'>
       <strong>${r.title}</strong> (${r.rating}점)<br>${r.text}
@@ -126,6 +143,11 @@ function displayRanking() {
     avg: (d.total / d.count).toFixed(2),
     count: d.count
   })).sort((a, b) => b.avg - a.avg || b.count - a.count);
+
+  if (ranked.length === 0) { // 빈 데이터 처리
+    document.getElementById("rankingTop").innerHTML = "<p>랭킹 데이터가 없습니다.</p>";
+    return;
+  }
 
   const top5 = ranked.slice(0, 5).map((b, i) => `
     <div class='rank-card'><strong>${i + 1}위: ${b.title}</strong><br>평균 ${b.avg}점 (${b.count}명)</div>
