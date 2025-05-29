@@ -1,8 +1,8 @@
 // Firebase 설정
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
+  apiKey: "YOUR_API_KEY", // 실제 Firebase API 키로 대체
+  authDomain: "YOUR_AUTH_DOMAIN", // 실제 Auth 도메인으로 대체
+  projectId: "YOUR_PROJECT_ID", // 실제 프로젝트 ID로 대체
   storageBucket: "YOUR_STORAGE_BUCKET",
   messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
   appId: "YOUR_APP_ID"
@@ -14,13 +14,13 @@ const db = firebase.firestore();
 
 // 책 저장 함수
 function saveReview() {
-  const selectedBook = document.getElementById("book-select").value;
-  const category = document.getElementById("book-category").value;
+  const selectedBook = document.getElementById("book-select").value.trim();
+  const category = document.getElementById("book-category").value.trim();
   const comment = document.getElementById("review-text").value.trim();
-  const rating = parseInt(document.getElementById("rating").value);
+  const rating = parseInt(document.getElementById("rating").value, 10);
 
-  if (!comment || isNaN(rating)) {
-    alert("후기와 별점을 모두 입력해주세요.");
+  if (!selectedBook || !category || !comment || isNaN(rating)) {
+    alert("모든 필드를 정확히 입력해주세요.");
     return;
   }
 
@@ -48,22 +48,32 @@ function saveReview() {
         ratingCount: ratingCount + 1
       }, { merge: true });
 
+      alert("후기가 저장되었습니다.");
       loadReviews();
       loadTopBooks();
     });
+  }).catch(error => {
+    console.error("Error saving review:", error);
+    alert("후기 저장 중 오류가 발생했습니다.");
   });
 }
 
 // 후기 목록 불러오기
 function loadReviews() {
   const reviewList = document.getElementById("review-list");
-  reviewList.innerHTML = "";
+  reviewList.innerHTML = "<p>불러오는 중...</p>";
 
   db.collection("reviews")
     .orderBy("timestamp", "desc")
     .limit(10)
     .get()
     .then(snapshot => {
+      if (snapshot.empty) {
+        reviewList.innerHTML = "<p>아직 후기가 없습니다.</p>";
+        return;
+      }
+
+      reviewList.innerHTML = ""; // 초기화
       snapshot.forEach(doc => {
         const data = doc.data();
         const bookTitle = data.bookId || "제목 없음";
@@ -74,12 +84,23 @@ function loadReviews() {
         reviewDiv.textContent = `${bookTitle} (${rating}점): ${comment}`;
         reviewList.appendChild(reviewDiv);
       });
+    }).catch(error => {
+      console.error("Error fetching reviews:", error);
+      reviewList.innerHTML = "<p>후기를 불러오는 중 오류가 발생했습니다.</p>";
     });
 }
 
 // 인기 도서 1위 불러오기
 function loadTopBooks() {
+  const topBookDiv = document.getElementById("top-book");
+  topBookDiv.innerHTML = "<p>불러오는 중...</p>";
+
   db.collection("books").get().then(snapshot => {
+    if (snapshot.empty) {
+      topBookDiv.innerHTML = "<p>아직 데이터가 없습니다.</p>";
+      return;
+    }
+
     let topBook = null;
     let topAvg = 0;
 
@@ -92,12 +113,14 @@ function loadTopBooks() {
       }
     });
 
-    const topBookDiv = document.getElementById("top-book");
     if (topBook && topBook.title) {
       topBookDiv.innerHTML = `1위: ${topBook.title}<br>평균 ${topAvg.toFixed(1)}점 (${topBook.ratingCount || 0}명)`;
     } else {
-      topBookDiv.innerHTML = "아직 데이터가 없습니다.";
+      topBookDiv.innerHTML = "<p>아직 데이터가 없습니다.</p>";
     }
+  }).catch(error => {
+    console.error("Error fetching top books:", error);
+    topBookDiv.innerHTML = "<p>인기 도서를 불러오는 중 오류가 발생했습니다.</p>";
   });
 }
 
