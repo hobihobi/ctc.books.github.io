@@ -1,7 +1,7 @@
 const bookData = {
   1: {
     "국어": [
-      { title: "고전읽기의 즐거움", image: "https://via.placeholder.com/120x180", link: "#" },
+      { title: "고전읽기의 즐거움", image: "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788981332624.jpg/120x180", link: "#" },
       { title: "문학과 사회", image: "https://via.placeholder.com/120x180", link: "#" }
     ],
     "수학": [
