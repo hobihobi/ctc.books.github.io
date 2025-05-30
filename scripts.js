@@ -1,131 +1,146 @@
-// Firebase 설정
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // 실제 Firebase API 키로 대체
-  authDomain: "YOUR_AUTH_DOMAIN", // 실제 Auth 도메인으로 대체
-  projectId: "YOUR_PROJECT_ID", // 실제 프로젝트 ID로 대체
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+const data = {
+  1: {
+    "국어": [
+      { title: "고전읽기의 즐거움", image: "https://via.placeholder.com/120x180", link: "#" },
+      { title: "문학과 사회", image: "https://via.placeholder.com/120x180", link: "#" }
+    ],
+    "수학": [
+      { title: "수학이 필요한 순간", image: "https://via.placeholder.com/120x180", link: "#" },
+      { title: "수학의 정석 (기초편)", image: "https://via.placeholder.com/120x180", link: "#" }
+    ]
+  },
+  2: {
+    "독서": [
+      { title: "독서의 기술", image: "https://via.placeholder.com/120x180", link: "#" }
+    ]
+  },
+  3: {
+    "언어와 매체": [
+      { title: "국어의 기술", image: "https://via.placeholder.com/120x180", link: "#" }
+    ]
+  }
 };
 
-// Firebase 초기화
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+let selectedGrade = null;
+let reviews = [];
 
-// 책 저장 함수
-function saveReview() {
-  const selectedBook = document.getElementById("book-select").value.trim();
-  const category = document.getElementById("book-category").value.trim();
-  const comment = document.getElementById("review-text").value.trim();
-  const rating = parseInt(document.getElementById("rating").value, 10);
+function selectGrade(grade) {
+  selectedGrade = grade;
+  document.getElementById("mainPage").classList.add("hidden");
+  document.getElementById("subjectPage").classList.remove("hidden");
+  document.getElementById("rankPage").classList.add("hidden");
 
-  if (!selectedBook || !category || !comment || isNaN(rating)) {
-    alert("모든 필드를 정확히 입력해주세요.");
+  document.getElementById("subjectTitle").textContent = `${grade}학년 과목 선택`;
+  const btnGroup = document.getElementById("subjectButtons");
+  btnGroup.innerHTML = "";
+  for (let subject in data[grade]) {
+    const btn = document.createElement("button");
+    btn.textContent = subject;
+    btn.onclick = () => showBooks(grade, subject);
+    btnGroup.appendChild(btn);
+  }
+}
+
+function showBooks(grade, subject) {
+  const books = data[grade][subject];
+  const bookList = document.getElementById("bookList");
+  bookList.innerHTML = `<h3>${subject} 추천 도서</h3>`;
+  books.forEach(book => {
+    bookList.innerHTML += `
+      <div class="book-card">
+        <a href="${book.link}" target="_blank">
+          <img src="${book.image}" alt="${book.title}" />
+        </a>
+        <p>${book.title}</p>
+      </div>
+    `;
+  });
+}
+
+function showMain() {
+  document.getElementById("mainPage").classList.remove("hidden");
+  document.getElementById("subjectPage").classList.add("hidden");
+  document.getElementById("rankPage").classList.add("hidden");
+}
+
+function showRank() {
+  document.getElementById("mainPage").classList.add("hidden");
+  document.getElementById("subjectPage").classList.add("hidden");
+  document.getElementById("rankPage").classList.remove("hidden");
+}
+
+function toggleReviewForm() {
+  document.getElementById("reviewForm").classList.toggle("hidden");
+}
+
+function submitReview() {
+  const title = document.getElementById("reviewSelect").value || document.getElementById("reviewTitle").value.trim();
+  const text = document.getElementById("reviewText").value.trim();
+  const rating = parseInt(document.getElementById("reviewRating").value);
+
+  if (!title || !text) {
+    alert("책 제목과 후기를 입력하세요.");
     return;
   }
 
-  const bookRef = db.collection("books").doc(selectedBook);
-  const reviewData = {
-    category,
-    comment,
-    rating,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  };
+  const newReview = { title, text, rating };
+  reviews.push(newReview);
+  localStorage.setItem("bookReviews", JSON.stringify(reviews));
+  displayReviews();
+  displayRanking();
 
-  // 후기 저장 및 별점 업데이트
-  db.collection("reviews").add({
-    bookId: selectedBook,
-    ...reviewData
-  }).then(() => {
-    bookRef.get().then(doc => {
-      const data = doc.exists ? doc.data() : {};
-      const totalRating = data.totalRating || 0;
-      const ratingCount = data.ratingCount || 0;
+  document.getElementById("reviewForm").classList.add("hidden");
+  document.getElementById("reviewTitle").value = "";
+  document.getElementById("reviewText").value = "";
+  document.getElementById("reviewRating").value = "5";
+  document.getElementById("reviewSelect").value = "";
+}
 
-      bookRef.set({
-        title: selectedBook,
-        totalRating: totalRating + rating,
-        ratingCount: ratingCount + 1
-      }, { merge: true });
+function displayReviews() {
+  const out = reviews.map(r => `
+    <div class='review-item'>
+      <strong>${r.title}</strong> (${r.rating}점)<br>${r.text}
+    </div>`).join("");
+  document.getElementById("reviewDisplay").innerHTML = out;
+}
 
-      alert("후기가 저장되었습니다.");
-      loadReviews();
-      loadTopBooks();
+function displayRanking() {
+  const rankMap = {};
+  reviews.forEach(r => {
+    if (!rankMap[r.title]) rankMap[r.title] = { count: 0, total: 0 };
+    rankMap[r.title].count++;
+    rankMap[r.title].total += r.rating;
+  });
+
+  const ranked = Object.entries(rankMap).map(([title, d]) => ({
+    title,
+    avg: (d.total / d.count).toFixed(2),
+    count: d.count
+  })).sort((a, b) => b.avg - a.avg || b.count - a.count);
+
+  const top5 = ranked.slice(0, 5).map((b, i) => `
+    <div class='rank-card'><strong>${i + 1}위: ${b.title}</strong><br>평균 ${b.avg}점 (${b.count}명)</div>
+  `).join("");
+  document.getElementById("rankingTop").innerHTML = top5;
+}
+
+function populateBookOptions() {
+  const select = document.getElementById("reviewSelect");
+  select.innerHTML = '<option value="">직접 입력</option>';
+  Object.values(data).forEach(subjects => {
+    Object.values(subjects).flat().forEach(book => {
+      const opt = document.createElement("option");
+      opt.value = book.title;
+      opt.textContent = book.title;
+      select.appendChild(opt);
     });
-  }).catch(error => {
-    console.error("Error saving review:", error);
-    alert("후기 저장 중 오류가 발생했습니다.");
   });
 }
 
-// 후기 목록 불러오기
-function loadReviews() {
-  const reviewList = document.getElementById("review-list");
-  reviewList.innerHTML = "<p>불러오는 중...</p>";
-
-  db.collection("reviews")
-    .orderBy("timestamp", "desc")
-    .limit(10)
-    .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        reviewList.innerHTML = "<p>아직 후기가 없습니다.</p>";
-        return;
-      }
-
-      reviewList.innerHTML = ""; // 초기화
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const bookTitle = data.bookId || "제목 없음";
-        const comment = data.comment || "(내용 없음)";
-        const rating = data.rating || 0;
-
-        const reviewDiv = document.createElement("div");
-        reviewDiv.textContent = `${bookTitle} (${rating}점): ${comment}`;
-        reviewList.appendChild(reviewDiv);
-      });
-    }).catch(error => {
-      console.error("Error fetching reviews:", error);
-      reviewList.innerHTML = "<p>후기를 불러오는 중 오류가 발생했습니다.</p>";
-    });
-}
-
-// 인기 도서 1위 불러오기
-function loadTopBooks() {
-  const topBookDiv = document.getElementById("top-book");
-  topBookDiv.innerHTML = "<p>불러오는 중...</p>";
-
-  db.collection("books").get().then(snapshot => {
-    if (snapshot.empty) {
-      topBookDiv.innerHTML = "<p>아직 데이터가 없습니다.</p>";
-      return;
-    }
-
-    let topBook = null;
-    let topAvg = 0;
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const avg = (data.totalRating || 0) / (data.ratingCount || 1);
-      if (!topBook || avg > topAvg) {
-        topBook = data;
-        topAvg = avg;
-      }
-    });
-
-    if (topBook && topBook.title) {
-      topBookDiv.innerHTML = `1위: ${topBook.title}<br>평균 ${topAvg.toFixed(1)}점 (${topBook.ratingCount || 0}명)`;
-    } else {
-      topBookDiv.innerHTML = "<p>아직 데이터가 없습니다.</p>";
-    }
-  }).catch(error => {
-    console.error("Error fetching top books:", error);
-    topBookDiv.innerHTML = "<p>인기 도서를 불러오는 중 오류가 발생했습니다.</p>";
-  });
-}
-
-// 페이지 로드시 호출
-window.onload = () => {
-  loadReviews();
-  loadTopBooks();
+// 초기 실행
+window.onload = function () {
+  reviews = JSON.parse(localStorage.getItem("bookReviews")) || [];
+  displayReviews();
+  displayRanking();
+  populateBookOptions();
 };
