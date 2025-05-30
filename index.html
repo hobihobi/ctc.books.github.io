@@ -62,15 +62,18 @@
       <input type="text" id="reviewTitle" placeholder="책 제목 (자유 입력)" />
       <textarea id="reviewText" placeholder="후기 작성"></textarea>
       <label>별점:
-        <select id="reviewRating">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option selected>5</option>
-        </select>
-      </label>
-      <button type="button" onclick="submitReview()">저장</button>
+<!-- 후기 입력 폼 -->
+    <select id="book-select">
+  <option value="수학이 필요한 순간">수학이 필요한 순간</option>
+  <option value="국어의 기술">국어의 기술</option>
+</select>
+
+<input id="book-category" placeholder="과목">
+<textarea id="review-text" placeholder="후기 내용을 입력하세요."></textarea>
+<input id="rating" type="number" min="1" max="5" value="5">
+
+<!-- 여기 이 버튼이 중요! -->
+<button onclick="saveReview()">후기 저장</button>
     </form>
   </section>
 
