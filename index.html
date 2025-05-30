@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+   <script src="scripts.js" defer></script>
   <!-- Firebase App (기본 SDK) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-
-<!-- Firestore SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>고등학생 책 추천 웹사이트</title>
@@ -79,19 +77,5 @@
 
   <!-- JavaScript 파일 연결 -->
   <script src="scripts.js" defer></script>
-  <!-- scripts.js 파일 대신 직접 붙이기 -->
-<script>
-  alert("직접 삽입한 스크립트 실행됨!");
-
-  function showMain() {
-    // 메인 페이지 보여주는 로직
-    document.getElementById("mainPage").classList.remove("hidden");
-    document.getElementById("subjectPage").classList.add("hidden");
-    document.getElementById("rankPage").classList.add("hidden");
-  }
-
-  // 다른 함수들도 여기에 붙이세요
-  // 예: selectGrade(), showRank(), saveReview(), loadReviews() 등
-</script>
 </body>
 </html>
